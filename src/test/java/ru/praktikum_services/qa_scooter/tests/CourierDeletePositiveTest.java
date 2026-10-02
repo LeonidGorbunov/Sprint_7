@@ -3,30 +3,32 @@ package ru.praktikum_services.qa_scooter.tests;
 import io.qameta.allure.*;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
-import org.junit.After;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.*;
 import ru.praktikum_services.qa_scooter.data.CourierDataGenerator;
+import ru.praktikum_services.qa_scooter.models.request.CourierCreateRequest;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @Epic("Яндекс.Самокат")
 @Feature("5. Удаление курьера, эндпоинт delete /api/v1/courier/:id")
 @Story("1. Позитивные сценарии")
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class CourierDeletePositiveTest extends BaseTest {
+
+    private CourierCreateRequest courierRequest;
+    private Integer courierId;
+
+    @Before
+    public void setUp() {
+        courierRequest = CourierDataGenerator.getDefaultCourier();
+        courierClient.actionCourierCreate(courierRequest);
+        Response loginResponse = courierClient.actionCourierLogin(courierRequest);
+        courierId = loginResponse.path("id");
+    }
 
     @Test
     @DisplayName("1. Успешное удаление курьера")
     @Description("Тест проверяет, что метод delete /api/v1/courier/:id возвращает 200 и тело ответа \"ok\": \"true\"")
-    public void step1_deleteCourierAndCheckResponseCodeAndBody() {
-
-        courierRequest = CourierDataGenerator.getDefaultCourier();
-
-        courierClient.actionCourierCreate(courierRequest);
-        Response loginResponse = courierClient.actionCourierLogin(courierRequest);
-        int courierId = loginResponse.path("id");
+    public void deleteCourierAndCheckResponseCodeAndBody() {
 
         Response response = courierClient.actionCourierDelete(courierId);
 

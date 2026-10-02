@@ -4,11 +4,11 @@ import io.qameta.allure.*;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
 import org.junit.After;
-import org.junit.FixMethodOrder;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runners.MethodSorters;
 import ru.praktikum_services.qa_scooter.data.CourierDataGenerator;
 import ru.praktikum_services.qa_scooter.data.OrderDataGenerator;
+import ru.praktikum_services.qa_scooter.models.request.CourierCreateRequest;
 import ru.praktikum_services.qa_scooter.models.request.OrderCreateRequest;
 import java.util.List;
 import static org.junit.Assert.assertEquals;
@@ -17,26 +17,33 @@ import static org.junit.Assert.assertTrue;
 @Epic("Яндекс.Самокат")
 @Feature("6. Принять заказ, эндпоинт put /api/v1/orders/accept/:id")
 @Story("1. Позитивные сценарии")
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class OrderAcceptPositiveTest extends BaseTest {
+
+    private CourierCreateRequest courierRequest;
+    private Integer courierId;
+    private Integer orderTrack;
+    private Integer orderId;
+
+    @Before
+    public void setUp() {
+        BaseTest.baseSetUp();
+        courierRequest = CourierDataGenerator.getDefaultCourier();
+        courierClient.actionCourierCreate(courierRequest);
+        Response loginResponse = courierClient.actionCourierLogin(courierRequest);
+        courierId = loginResponse.path("id");
+
+        OrderCreateRequest orderRequest = OrderDataGenerator.getDefaultOrder(List.of("BLACK"));
+        Response orderResponse = orderClient.actionOrderCreate(orderRequest);
+        orderTrack = orderResponse.path("track");
+
+        Response getOrderResponse = orderClient.actionOrderGetByTrackNumber(orderTrack);
+        orderId = getOrderResponse.path("order.id");
+    }
 
     @Test
     @DisplayName("1. Успешное принятие заказа")
     @Description("Тест проверяет, что метод put /api/v1/orders/accept/:id возвращает 200 и тело ответа \"ok\": \"true\"")
-    public void step1_acceptOrderAndCheckResponseCodeAndBody() {
-
-        courierRequest = CourierDataGenerator.getDefaultCourier();
-
-        courierClient.actionCourierCreate(courierRequest);
-        Response loginResponse = courierClient.actionCourierLogin(courierRequest);
-        int courierId = loginResponse.path("id");
-
-        OrderCreateRequest orderRequest = OrderDataGenerator.getDefaultOrder(List.of("BLACK"));
-        Response orderResponse = orderClient.actionOrderCreate(orderRequest);
-        this.orderTrack = orderResponse.path("track");
-
-        Response getOrderResponse = orderClient.actionOrderGetByTrackNumber(orderTrack);
-        int orderId = getOrderResponse.path("order.id");
+    public void acceptOrderAndCheckResponseCodeAndBody() {
 
         Response orderAcceptResponse = orderClient.actionOrderAccept(orderId, courierId);
 

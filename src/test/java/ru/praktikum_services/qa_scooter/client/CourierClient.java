@@ -13,8 +13,7 @@ public class CourierClient extends BaseClient {
     @Step("Действие: запрос на создание курьера, post /api/v1/courier")
     public Response actionCourierCreate (CourierCreateRequest courierRequest) {
 
-        return given()
-               .contentType(ContentType.JSON)
+        return given(getBaseSpec())
                .body(courierRequest)
                .when()
                .post("/api/v1/courier")
@@ -28,8 +27,7 @@ public class CourierClient extends BaseClient {
         loginBody.setLogin(courierRequest.getLogin());
         loginBody.setPassword(courierRequest.getPassword());
 
-        return given()
-                .contentType(ContentType.JSON)
+        return given(getBaseSpec())
                 .body(loginBody)
                 .when()
                 .post("/api/v1/courier/login")
@@ -41,8 +39,7 @@ public class CourierClient extends BaseClient {
     public Response actionCourierDelete(Object courierId) {
         CourierDeleteRequest deleteBody = new CourierDeleteRequest(courierId);
 
-        return given()
-                .contentType(ContentType.JSON)
+        return given(getBaseSpec())
                 .body(deleteBody)
                 .when()
                 .delete("/api/v1/courier/{id}", courierId)
@@ -54,8 +51,7 @@ public class CourierClient extends BaseClient {
     public Response actionCourierDelete(Object courierIdPath, Object courierIdBody) {
         CourierDeleteRequest deleteBody = new CourierDeleteRequest(courierIdBody);
 
-        return given()
-                .contentType(ContentType.JSON)
+        return given(getBaseSpec())
                 .body(deleteBody)
                 .when()
                 .delete("/api/v1/courier/{id}", courierIdPath)

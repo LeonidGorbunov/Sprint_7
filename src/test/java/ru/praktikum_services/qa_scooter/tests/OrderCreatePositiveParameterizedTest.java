@@ -4,6 +4,7 @@ import io.qameta.allure.*;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -17,6 +18,9 @@ import static org.junit.Assert.*;
 @Story("1. Позитивные сценарии с параметризованной передачей цвета самоката")
 @RunWith(Parameterized.class)
 public class OrderCreatePositiveParameterizedTest extends BaseTest {
+
+    private Integer orderTrack;
+    private OrderCreateRequest orderRequest;
 
     @Parameterized.Parameter(0)
     public String testCaseName;
@@ -34,6 +38,11 @@ public class OrderCreatePositiveParameterizedTest extends BaseTest {
         };
     }
 
+    @Before
+    public void setUp() {
+        orderRequest = OrderDataGenerator.getDefaultOrder(scooterColor);
+    }
+
     @Test
     @DisplayName("Успешное создание нового заказа (с параметризацией цвета самоката)")
     @Description("Тест проверяет, что метод post /api/v1/orders возвращает 201 и тело ответа с номером трэка (ключ \"track\"), " +
@@ -43,11 +52,9 @@ public class OrderCreatePositiveParameterizedTest extends BaseTest {
         Allure.parameter("Описание сценария", testCaseName);
         Allure.parameter("Цвет самоката", scooterColor.toString());
 
-        OrderCreateRequest orderRequest = OrderDataGenerator.getDefaultOrder(scooterColor);
-
         Response response = orderClient.actionOrderCreate(orderRequest);
 
-        this.orderTrack = response.path("track");
+        orderTrack = response.path("track");
 
         Allure.step("Проверка контракта и тела успешного ответа", () -> {
             assertEquals("Статус-код ответа не 201!", 201, response.getStatusCode());

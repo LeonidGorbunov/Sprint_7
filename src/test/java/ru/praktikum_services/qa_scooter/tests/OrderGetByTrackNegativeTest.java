@@ -3,28 +3,25 @@ package ru.praktikum_services.qa_scooter.tests;
 import io.qameta.allure.*;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
-import org.junit.FixMethodOrder;
 import org.junit.Test;
-import org.junit.runners.MethodSorters;
 import static org.junit.Assert.assertEquals;
 
 @Epic("Яндекс.Самокат")
 @Feature("7. Получить заказ по его номеру, эндпоинт get /api/v1/orders/track")
 @Story("2. Негативные сценарии")
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class OrderGetByTrackNegativeTest extends BaseTest {
 
     @Test
     @DisplayName("1. Получение заказа без передачи номера трека")
     @Description("Тест проверяет, что метод возвращает 400 и тело ответа \"message\": \"Недостаточно данных для поиска\", " +
             "если передан трек без номера (пустая строка)")
-    public void step1_getOrderByTrackWithoutNumber() {
+    public void getOrderByTrackWithoutNumber() {
 
         Response response = orderClient.actionOrderGetByTrackNumber("");
 
         Allure.step("Проверка контракта и тела ответа при отсутствии номера трека", () -> {
             assertEquals("Статус-код ответа должен быть 400!", 400, response.getStatusCode());
-            assertEquals("В теле ответа должно быть \"message\":  \"Недостаточно данных для поиска\"",
+            assertEquals("В теле ответа должно быть \"message\": \"Недостаточно данных для поиска\"",
                     "Недостаточно данных для поиска", response.path("message"));
         });
     }
@@ -33,9 +30,9 @@ public class OrderGetByTrackNegativeTest extends BaseTest {
     @DisplayName("2. Получение заказа при передаче несуществующего номера трека")
     @Description("Тест проверяет, что метод возвращает 404 и тело ответа \"message\": \"Заказ не найден\", " +
             "при передаче несуществующего номера трека")
-    public void step2_getOrderByTrackWithUnexistentNumber() {
+    public void getOrderByTrackWithUnexistentNumber() {
 
-        int wrongTrackNumber = Integer.MAX_VALUE;
+        Integer wrongTrackNumber = Integer.MAX_VALUE;
 
         Response response = orderClient.actionOrderGetByTrackNumber(wrongTrackNumber);
 

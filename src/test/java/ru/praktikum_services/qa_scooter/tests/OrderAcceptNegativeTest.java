@@ -3,12 +3,10 @@ package ru.praktikum_services.qa_scooter.tests;
 import io.qameta.allure.*;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
-import org.junit.After;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.*;
 import ru.praktikum_services.qa_scooter.data.CourierDataGenerator;
 import ru.praktikum_services.qa_scooter.data.OrderDataGenerator;
+import ru.praktikum_services.qa_scooter.models.request.CourierCreateRequest;
 import ru.praktikum_services.qa_scooter.models.request.OrderCreateRequest;
 import java.util.List;
 import static org.junit.Assert.assertEquals;
@@ -16,21 +14,35 @@ import static org.junit.Assert.assertEquals;
 @Epic("Яндекс.Самокат")
 @Feature("6. Принять заказ, эндпоинт put /api/v1/orders/accept/:id")
 @Story("2. Негативные сценарии")
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class OrderAcceptNegativeTest extends BaseTest {
+
+    private static Integer orderId;
+    private static Integer orderTrack;
+    private CourierCreateRequest courierRequest;
+    private Integer courierId;
+
+    @BeforeClass
+    public static void setUpOrder() {
+        OrderCreateRequest orderRequest = OrderDataGenerator.getDefaultOrder(List.of("BLACK"));
+        Response orderResponse = orderClient.actionOrderCreate(orderRequest);
+        orderTrack = orderResponse.path("track");
+        Response getOrderResponse = orderClient.actionOrderGetByTrackNumber(orderTrack);
+        orderId = getOrderResponse.path("order.id");
+    }
+
+    @Before
+    public void setUpCourier() {
+        courierRequest = CourierDataGenerator.getDefaultCourier();
+        courierClient.actionCourierCreate(courierRequest);
+        Response loginResponse = courierClient.actionCourierLogin(courierRequest);
+        courierId = loginResponse.path("id");
+    }
 
     @Test
     @DisplayName("1. Принятие заказа без передачи ID курьера")
     @Description("Тест проверяет, что метод возвращает 400 и тело ответа \"message\": \"Недостаточно данных для поиска\", " +
             "если в courierId передана пустая строка")
-    public void step1_acceptOrderWithoutCourierId() {
-
-        OrderCreateRequest orderRequest = OrderDataGenerator.getDefaultOrder(List.of("BLACK"));
-        Response orderResponse = orderClient.actionOrderCreate(orderRequest);
-        this.orderTrack = orderResponse.path("track");
-
-        Response getOrderResponse = orderClient.actionOrderGetByTrackNumber(orderTrack);
-        int orderId = getOrderResponse.path("order.id");
+    public void acceptOrderWithoutCourierId() {
 
         Response response = orderClient.actionOrderAccept(orderId, "");
 
@@ -45,22 +57,11 @@ public class OrderAcceptNegativeTest extends BaseTest {
     @DisplayName("2. Принятие заказа с несуществующим ID курьера")
     @Description("Тест проверяет, что метод возвращает 404 и тело ответа \"message\": \"Курьера с таким id не существует\", " +
             "если в courierId передан номер несуществующего курьера")
-    public void step2_acceptOrderWithUnexistentCourierId() {
+    public void acceptOrderWithUnexistentCourierId() {
 
-        OrderCreateRequest orderRequest = OrderDataGenerator.getDefaultOrder(List.of("BLACK"));
-        Response orderResponse = orderClient.actionOrderCreate(orderRequest);
-        this.orderTrack = orderResponse.path("track");
+        courierClient.actionCourierDelete(courierId);
 
-        Response getOrderResponse = orderClient.actionOrderGetByTrackNumber(orderTrack);
-        int orderId = getOrderResponse.path("order.id");
-
-        courierRequest = CourierDataGenerator.getDefaultCourier();
-        courierClient.actionCourierCreate(courierRequest);
-        Response loginResponse = courierClient.actionCourierLogin(courierRequest);
-        int unexistentCourierId = loginResponse.path("id");
-        courierClient.actionCourierDelete(unexistentCourierId);
-
-        Response response = orderClient.actionOrderAccept(orderId, unexistentCourierId);
+        Response response = orderClient.actionOrderAccept(orderId, courierId);
 
         Allure.step("Проверка контракта и тела ответа при передаче несуществующего ID курьера", () -> {
             assertEquals("Статус-код ответа должен быть 404!", 404, response.getStatusCode());
@@ -73,12 +74,7 @@ public class OrderAcceptNegativeTest extends BaseTest {
     @DisplayName("3. Принятие заказа без передачи ID заказа")
     @Description("Тест проверяет, что метод возвращает 400 и тело ответа \"message\": \"Недостаточно данных для поиска\" " +
             "если вместо ID заказа в URL передана пустая строка")
-    public void step3_acceptOrderWithoutOrderId() {
-
-        courierRequest = CourierDataGenerator.getDefaultCourier();
-        courierClient.actionCourierCreate(courierRequest);
-        Response loginResponse = courierClient.actionCourierLogin(courierRequest);
-        int courierId = loginResponse.path("id");
+    public void acceptOrderWithoutOrderId() {
 
         Response response = orderClient.actionOrderAccept("", courierId);
 
@@ -93,13 +89,9 @@ public class OrderAcceptNegativeTest extends BaseTest {
     @DisplayName("4. Принятие заказа с несуществующим ID заказа")
     @Description("Тест проверяет, что метод возвращает 404 и тело ответа \"message\": \"Заказа с таким id не существует\" " +
             "при передаче несуществующего id заказа")
-    public void step4_acceptOrderWithUnexistentOrderId() {
+    public void acceptOrderWithUnexistentOrderId() {
 
-        courierRequest = CourierDataGenerator.getDefaultCourier();
-        courierClient.actionCourierCreate(courierRequest);
-        Response loginResponse = courierClient.actionCourierLogin(courierRequest);
-        int courierId = loginResponse.path("id");
-        int wrongOrderId = Integer.MAX_VALUE;
+        Integer wrongOrderId = Integer.MAX_VALUE;
 
         Response response = orderClient.actionOrderAccept(wrongOrderId, courierId);
 
@@ -111,8 +103,12 @@ public class OrderAcceptNegativeTest extends BaseTest {
     }
 
     @After
-    public void cleanUp() {
-        orderClient.actionOrderCancelIfCreated(orderTrack);
+    public void cleanUpCourier() {
         courierClient.actionCourierDeleteIfCreated(courierRequest);
+    }
+
+    @AfterClass
+    public static void cleanUpOrder() {
+        orderClient.actionOrderCancelIfCreated(orderTrack);
     }
 }

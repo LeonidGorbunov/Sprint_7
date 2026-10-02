@@ -4,31 +4,36 @@ import io.qameta.allure.*;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
 import org.junit.After;
-import org.junit.FixMethodOrder;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runners.MethodSorters;
 import ru.praktikum_services.qa_scooter.data.OrderDataGenerator;
 import ru.praktikum_services.qa_scooter.models.request.OrderCreateRequest;
 import java.util.List;
+import java.util.Map;
+
 import static org.junit.Assert.*;
 
 @Epic("Яндекс.Самокат")
 @Feature("7. Получить заказ по его номеру, эндпоинт get /api/v1/orders/track")
 @Story("1. Позитивные сценарии")
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class OrderGetByTrackPositiveTest extends BaseTest {
+
+    private Integer orderTrack;
+
+    @Before
+    public void setUp() {
+        OrderCreateRequest orderRequest = OrderDataGenerator.getDefaultOrder(List.of("BLACK"));
+        Response orderResponse = orderClient.actionOrderCreate(orderRequest);
+        orderTrack = orderResponse.path("track");
+    }
 
     @Test
     @DisplayName("1. Успешное получение заказа")
     @Description("Тест проверяет, что метод get /api/v1/orders/track возвращает 200 и тело ответа с заказом")
-    public void step1_getOrderAndCheckResponseCodeAndBody() {
-
-        OrderCreateRequest orderRequest = OrderDataGenerator.getDefaultOrder(List.of("BLACK"));
-        Response orderResponse = orderClient.actionOrderCreate(orderRequest);
-        this.orderTrack = orderResponse.path("track");
+    public void getOrderAndCheckResponseCodeAndBody() {
 
         Response response = orderClient.actionOrderGetByTrackNumber(orderTrack);
-        Object orderBody = response.path("order");
+        Map<String, Object> orderBody = response.path("order");
 
         Allure.step("Проверка контракта и тела успешного ответа получения заказа по номеру его трека", () -> {
             assertEquals("Статус-код ответа не 200!", 200, response.getStatusCode());

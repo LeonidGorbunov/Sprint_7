@@ -3,26 +3,30 @@ package ru.praktikum_services.qa_scooter.tests;
 import io.qameta.allure.*;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
-import org.junit.After;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.*;
 import ru.praktikum_services.qa_scooter.data.CourierDataGenerator;
+import ru.praktikum_services.qa_scooter.models.request.CourierCreateRequest;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @Epic("Яндекс.Самокат")
 @Feature("1. Создание нового курьера, эндпоинт post /api/v1/courier")
 @Story("1. Позитивные сценарии")
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class CourierCreatePositiveTest extends BaseTest {
+
+    private CourierCreateRequest courierRequest;
+    private CourierCreateRequest courierRequestWithoutFirstName;
+
+    @Before
+    public void setUp() {
+        courierRequest = CourierDataGenerator.getDefaultCourier();
+        courierRequestWithoutFirstName = CourierDataGenerator.getCourierWithoutFirstName();
+    }
 
     @Test
     @DisplayName("1. Успешное создание нового курьера")
     @Description("Тест проверяет, что метод post /api/v1/courier возвращает 201 и тело ответа \"ok\": \"true\"")
-    public void step1_createCourierAndCheckResponseCodeAndBody() {
-
-        courierRequest = CourierDataGenerator.getDefaultCourier();
+    public void createCourierAndCheckResponseCodeAndBody() {
 
         Response response = courierClient.actionCourierCreate(courierRequest);
 
@@ -36,11 +40,9 @@ public class CourierCreatePositiveTest extends BaseTest {
     @DisplayName("2. Успешное создание курьера без передачи необязательного ключа \"firstName\"")
     @Description("Тест проверяет, что метод post /api/v1/courier возвращает 201 и \"ok\": \"true\" при создании курьера " +
             "без передачи необязательного ключа \"firstName\"")
-    public void step2_createCourierWithoutFirstName() {
+    public void createCourierWithoutFirstName() {
 
-        courierRequest = CourierDataGenerator.getCourierWithoutFirstName();
-
-        Response response = courierClient.actionCourierCreate(courierRequest);
+        Response response = courierClient.actionCourierCreate(courierRequestWithoutFirstName);
 
         Allure.step("Проверка контракта и тела успешного ответа", () -> {
             assertEquals("Статус-код ответа не 201!", 201, response.getStatusCode());
@@ -50,6 +52,7 @@ public class CourierCreatePositiveTest extends BaseTest {
 
     @After
     public void cleanUp() {
-        courierClient.actionCourierDeleteIfCreated(courierRequest);
+            courierClient.actionCourierDeleteIfCreated(courierRequest);
+            courierClient.actionCourierDeleteIfCreated(courierRequestWithoutFirstName);
     }
 }

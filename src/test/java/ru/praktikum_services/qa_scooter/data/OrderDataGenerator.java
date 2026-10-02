@@ -9,7 +9,7 @@ public class OrderDataGenerator {
 
     public static OrderCreateRequest getDefaultOrder(List<String> scooterColor) {
 
-        String uniqueSuffix = String.valueOf(System.currentTimeMillis()).substring(7);
+        String uniqueSuffix = String.valueOf(System.currentTimeMillis()).substring(6);
 
         return new OrderCreateRequest(
                 "Homer" + uniqueSuffix,

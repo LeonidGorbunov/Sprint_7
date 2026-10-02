@@ -10,8 +10,7 @@ public class OrderClient extends BaseClient {
 
     @Step("Действие: запрос на создание заказа, post /api/v1/orders")
     public Response actionOrderCreate (OrderCreateRequest orderCreateRequest) {
-        return given()
-                .contentType(ContentType.JSON)
+        return given(getBaseSpec())
                 .body(orderCreateRequest)
                 .when()
                 .post("/api/v1/orders")
@@ -21,7 +20,7 @@ public class OrderClient extends BaseClient {
 
     @Step("Действие: запрос на получение списка заказов, get /api/v1/orders")
     public Response actionOrderGetList() {
-        return given()
+        return given(getBaseSpec())
                 .when()
                 .get("/api/v1/orders")
                 .then()
@@ -30,7 +29,7 @@ public class OrderClient extends BaseClient {
 
     @Step("Действие: запрос на получение заказа по его номеру (track), get /api/v1/orders/track")
     public Response actionOrderGetByTrackNumber(Object trackNumber) {
-        return given()
+        return given(getBaseSpec())
                 .queryParam("t", trackNumber)
                 .when()
                 .get("/api/v1/orders/track")
@@ -40,7 +39,7 @@ public class OrderClient extends BaseClient {
 
     @Step("Действие: запрос на принятие заказа курьером, put /api/v1/orders/accept/:id")
     public Response actionOrderAccept(Object orderId, Object courierId) {
-        return given()
+        return given(getBaseSpec())
                 .queryParam("courierId", courierId)
                 .when()
                 .put("/api/v1/orders/accept/{id}", orderId)
@@ -53,7 +52,7 @@ public class OrderClient extends BaseClient {
         if (orderTrack == null) return;
         try {
             String jsonBody = String.format("{\"track\": %d}", orderTrack);
-            given()
+            given(getBaseSpec())
                     .contentType(ContentType.JSON)
                     .body(jsonBody)
                     .when()
