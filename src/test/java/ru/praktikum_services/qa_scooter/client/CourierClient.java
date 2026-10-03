@@ -1,7 +1,6 @@
 package ru.praktikum_services.qa_scooter.client;
 
 import io.qameta.allure.Step;
-import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import ru.praktikum_services.qa_scooter.models.request.CourierCreateRequest;
 import ru.praktikum_services.qa_scooter.models.request.CourierDeleteRequest;
@@ -22,13 +21,9 @@ public class CourierClient extends BaseClient {
     }
 
     @Step("Действие: запрос на логин курьера, post /api/v1/courier/login")
-    public Response actionCourierLogin(CourierCreateRequest courierRequest) {
-        CourierLoginRequest loginBody = new CourierLoginRequest();
-        loginBody.setLogin(courierRequest.getLogin());
-        loginBody.setPassword(courierRequest.getPassword());
-
+    public Response actionCourierLogin(CourierLoginRequest loginRequest) {
         return given(getBaseSpec())
-                .body(loginBody)
+                .body(loginRequest)
                 .when()
                 .post("/api/v1/courier/login")
                 .then()
@@ -63,7 +58,10 @@ public class CourierClient extends BaseClient {
     public void actionCourierDeleteIfCreated(CourierCreateRequest courierRequest) {
            if (courierRequest == null) return;
         try {
-            Response loginResponse = actionCourierLogin(courierRequest);
+            CourierLoginRequest loginBody = new CourierLoginRequest();
+            loginBody.setLogin(courierRequest.getLogin());
+            loginBody.setPassword(courierRequest.getPassword());
+            Response loginResponse = actionCourierLogin(loginBody);
             if (loginResponse.getStatusCode() == 200) {
                 Integer id = loginResponse.path("id");
                 if (id != null) {

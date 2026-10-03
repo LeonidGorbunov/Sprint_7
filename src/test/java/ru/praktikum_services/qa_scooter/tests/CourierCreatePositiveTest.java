@@ -20,7 +20,6 @@ public class CourierCreatePositiveTest extends BaseTest {
     @Before
     public void setUp() {
         courierRequest = CourierDataGenerator.getDefaultCourier();
-        courierRequestWithoutFirstName = CourierDataGenerator.getCourierWithoutFirstName();
     }
 
     @Test
@@ -41,6 +40,9 @@ public class CourierCreatePositiveTest extends BaseTest {
     @Description("Тест проверяет, что метод post /api/v1/courier возвращает 201 и \"ok\": \"true\" при создании курьера " +
             "без передачи необязательного ключа \"firstName\"")
     public void createCourierWithoutFirstName() {
+
+        courierRequestWithoutFirstName = CourierDataGenerator.getDefaultCourier();
+        courierRequestWithoutFirstName.setFirstName(null);
 
         Response response = courierClient.actionCourierCreate(courierRequestWithoutFirstName);
 

@@ -6,6 +6,7 @@ import io.restassured.response.Response;
 import org.junit.*;
 import ru.praktikum_services.qa_scooter.data.CourierDataGenerator;
 import ru.praktikum_services.qa_scooter.models.request.CourierCreateRequest;
+import ru.praktikum_services.qa_scooter.models.request.CourierLoginRequest;
 import static org.junit.Assert.*;
 
 @Epic("Яндекс.Самокат")
@@ -26,7 +27,9 @@ public class CourierLoginPositiveTest extends BaseTest {
     @Description("Тест проверяет, что метод post /api/v1/courier/login возвращает 200 и тело ответа с id курьера")
     public void loginCourierAndCheckResponseCodeAndBody() {
 
-        Response response = courierClient.actionCourierLogin(courierRequest);
+        CourierLoginRequest loginRequest = new CourierLoginRequest(courierRequest.getLogin(), courierRequest.getPassword());
+
+        Response response = courierClient.actionCourierLogin(loginRequest);
 
         Allure.step("Проверка контракта и тела успешного ответа", () -> {
             assertEquals("Статус-код ответа не 200!", 200, response.getStatusCode());

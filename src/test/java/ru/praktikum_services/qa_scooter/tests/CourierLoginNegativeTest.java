@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import ru.praktikum_services.qa_scooter.models.request.CourierCreateRequest;
 import ru.praktikum_services.qa_scooter.data.CourierDataGenerator;
+import ru.praktikum_services.qa_scooter.models.request.CourierLoginRequest;
 import static org.junit.Assert.assertEquals;
 
 @Epic("Яндекс.Самокат")
@@ -15,23 +16,11 @@ import static org.junit.Assert.assertEquals;
 @Story("2. Негативные сценарии")
 public class CourierLoginNegativeTest extends BaseTest {
 
-    private CourierCreateRequest courierRequestWithoutLogin;
-    private CourierCreateRequest courierRequestWithoutPassword;
-    private CourierCreateRequest courierRequestWithUnexistentLogin;
     private CourierCreateRequest courierRequest;
-    private CourierCreateRequest unexistentPasswordCourierRequest;
 
     @Before
     public void setUp() {
-        courierRequestWithoutLogin = CourierDataGenerator.getCourierWithoutLogin();
-
-        courierRequestWithoutPassword = CourierDataGenerator.getCourierWithoutPassword();
-
-        courierRequestWithUnexistentLogin = CourierDataGenerator.getCourierWithUnexistentLogin();
-
         courierRequest = CourierDataGenerator.getDefaultCourier();
-        unexistentPasswordCourierRequest = new CourierCreateRequest(courierRequest.getLogin(),
-                "wrong_pass_" + System.currentTimeMillis(), courierRequest.getFirstName());
     }
 
     @Test
@@ -40,7 +29,10 @@ public class CourierLoginNegativeTest extends BaseTest {
             "возвращает 400 и тело ответа \"message\": \"Недостаточно данных для входа\"")
     public void loginCourierWithoutLogin() {
 
-        Response response = courierClient.actionCourierLogin(courierRequestWithoutLogin);
+        CourierLoginRequest loginRequestWithoutLogin = CourierDataGenerator.getDefaultLoginRequest();
+        loginRequestWithoutLogin.setLogin(null);
+
+        Response response = courierClient.actionCourierLogin(loginRequestWithoutLogin);
 
         Allure.step("Проверка контракта и тела ответа без передачи логина", () -> {
             assertEquals("Статус-код ответа не 400!", 400, response.getStatusCode());
@@ -55,7 +47,10 @@ public class CourierLoginNegativeTest extends BaseTest {
             "возвращает 400 и тело ответа \"message\": \"Недостаточно данных для входа\"")
     public void loginCourierWithoutPassword() {
 
-        Response response = courierClient.actionCourierLogin(courierRequestWithoutPassword);
+        CourierLoginRequest loginRequestWithoutPassword = CourierDataGenerator.getDefaultLoginRequest();
+        loginRequestWithoutPassword.setPassword(null);
+
+        Response response = courierClient.actionCourierLogin(loginRequestWithoutPassword);
 
         Allure.step("Проверка контракта и тела ответа без передачи пароля", () -> {
             assertEquals("Статус-код ответа не 400!", 400, response.getStatusCode());
@@ -70,7 +65,10 @@ public class CourierLoginNegativeTest extends BaseTest {
             "возвращает 404 и тело ответа \"message\": \"Учетная запись не найдена\"")
     public void loginCourierWithUnexistentLogin() {
 
-        Response response = courierClient.actionCourierLogin(courierRequestWithUnexistentLogin);
+        CourierLoginRequest loginRequestWithUnexistentLogin = CourierDataGenerator.getDefaultLoginRequest();
+        loginRequestWithUnexistentLogin.setLogin("unregistered_" + System.currentTimeMillis());
+
+        Response response = courierClient.actionCourierLogin(loginRequestWithUnexistentLogin);
 
         Allure.step("Проверка контракта и тела ответа при передаче несуществующего в БД логина", () -> {
             assertEquals("Статус-код ответа не 404!", 404, response.getStatusCode());
@@ -87,7 +85,10 @@ public class CourierLoginNegativeTest extends BaseTest {
 
         courierClient.actionCourierCreate(courierRequest);
 
-        Response response = courierClient.actionCourierLogin(unexistentPasswordCourierRequest);
+        CourierLoginRequest unexistentPasswordLoginRequest =
+                new CourierLoginRequest(courierRequest.getLogin(), "wrong_pass_" + System.currentTimeMillis());
+
+        Response response = courierClient.actionCourierLogin(unexistentPasswordLoginRequest);
 
         Allure.step("Проверка контракта и тела ответа при передаче несуществующего в БД пароля", () -> {
             assertEquals("Статус-код ответа не 404!", 404, response.getStatusCode());

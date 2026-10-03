@@ -1,6 +1,7 @@
 package ru.praktikum_services.qa_scooter.data;
 
 import ru.praktikum_services.qa_scooter.models.request.CourierCreateRequest;
+import ru.praktikum_services.qa_scooter.models.request.CourierLoginRequest;
 
 public class CourierDataGenerator {
 
@@ -11,27 +12,8 @@ public class CourierDataGenerator {
         return new CourierCreateRequest(uniqueLogin, uniquePassword, uniqueFirstName);
     }
 
-    public static CourierCreateRequest getCourierWithoutLogin() {
-        CourierCreateRequest courier = getDefaultCourier();
-        courier.setLogin(null);
-        return courier;
-    }
-
-    public static CourierCreateRequest getCourierWithoutPassword() {
-        CourierCreateRequest courier = getDefaultCourier();
-        courier.setPassword(null);
-        return courier;
-    }
-
-    public static CourierCreateRequest getCourierWithoutFirstName() {
-        CourierCreateRequest courier = getDefaultCourier();
-        courier.setFirstName(null);
-        return courier;
-    }
-
-    public static CourierCreateRequest getCourierWithUnexistentLogin() {
-        CourierCreateRequest courier = getDefaultCourier();
-        courier.setLogin("unregistered_" + System.currentTimeMillis());
-        return courier;
+    public static CourierLoginRequest getDefaultLoginRequest() {
+        CourierCreateRequest defaultCourier = getDefaultCourier();
+        return new CourierLoginRequest(defaultCourier.getLogin(), defaultCourier.getPassword());
     }
 }

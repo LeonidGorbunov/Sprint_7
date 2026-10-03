@@ -23,10 +23,6 @@ public class CourierCreateNegativeTest extends BaseTest {
 
     @Before
     public void setUp() {
-        courierRequestWithoutLogin = CourierDataGenerator.getCourierWithoutLogin();
-
-        courierRequestWithoutPassword = CourierDataGenerator.getCourierWithoutPassword();
-
         courierForLoginDuplicateTest = CourierDataGenerator.getDefaultCourier();
         loginDuplicateCourierRequest = CourierDataGenerator.getDefaultCourier();
         loginDuplicateCourierRequest.setLogin(courierForLoginDuplicateTest.getLogin());
@@ -39,6 +35,9 @@ public class CourierCreateNegativeTest extends BaseTest {
     @Description("Тест проверяет, что метод post /api/v1/courier без передачи обязательного ключа \"login\" " +
             "возвращает 400 и тело ответа \"message\": \"Недостаточно данных для создания учетной записи\"")
     public void createCourierWithoutLogin() {
+
+        courierRequestWithoutLogin = CourierDataGenerator.getDefaultCourier();
+        courierRequestWithoutLogin.setLogin(null);
 
         Response response = courierClient.actionCourierCreate(courierRequestWithoutLogin);
 
@@ -54,6 +53,9 @@ public class CourierCreateNegativeTest extends BaseTest {
     @Description("Тест проверяет, что метод post /api/v1/courier без передачи обязательного ключа \"password\" " +
             "возвращает 400 и тело ответа \"message\": \"Недостаточно данных для создания учетной записи\"")
     public void createCourierWithoutPassword() {
+
+        courierRequestWithoutPassword = CourierDataGenerator.getDefaultCourier();
+        courierRequestWithoutPassword.setPassword(null);
 
         Response response = courierClient.actionCourierCreate(courierRequestWithoutPassword);
 

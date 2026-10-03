@@ -6,6 +6,7 @@ import io.restassured.response.Response;
 import org.junit.*;
 import ru.praktikum_services.qa_scooter.data.CourierDataGenerator;
 import ru.praktikum_services.qa_scooter.models.request.CourierCreateRequest;
+import ru.praktikum_services.qa_scooter.models.request.CourierLoginRequest;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -21,7 +22,9 @@ public class CourierDeletePositiveTest extends BaseTest {
     public void setUp() {
         courierRequest = CourierDataGenerator.getDefaultCourier();
         courierClient.actionCourierCreate(courierRequest);
-        Response loginResponse = courierClient.actionCourierLogin(courierRequest);
+
+        CourierLoginRequest loginRequest = new CourierLoginRequest(courierRequest.getLogin(), courierRequest.getPassword());
+        Response loginResponse = courierClient.actionCourierLogin(loginRequest);
         courierId = loginResponse.path("id");
     }
 

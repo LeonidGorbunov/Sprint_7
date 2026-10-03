@@ -9,6 +9,7 @@ import org.junit.Test;
 import ru.praktikum_services.qa_scooter.data.CourierDataGenerator;
 import ru.praktikum_services.qa_scooter.data.OrderDataGenerator;
 import ru.praktikum_services.qa_scooter.models.request.CourierCreateRequest;
+import ru.praktikum_services.qa_scooter.models.request.CourierLoginRequest;
 import ru.praktikum_services.qa_scooter.models.request.OrderCreateRequest;
 import java.util.List;
 import static org.junit.Assert.assertEquals;
@@ -26,10 +27,12 @@ public class OrderAcceptPositiveTest extends BaseTest {
 
     @Before
     public void setUp() {
-        BaseTest.baseSetUp();
         courierRequest = CourierDataGenerator.getDefaultCourier();
         courierClient.actionCourierCreate(courierRequest);
-        Response loginResponse = courierClient.actionCourierLogin(courierRequest);
+
+        CourierLoginRequest loginRequest = new CourierLoginRequest(courierRequest.getLogin(), courierRequest.getPassword());
+
+        Response loginResponse = courierClient.actionCourierLogin(loginRequest);
         courierId = loginResponse.path("id");
 
         OrderCreateRequest orderRequest = OrderDataGenerator.getDefaultOrder(List.of("BLACK"));

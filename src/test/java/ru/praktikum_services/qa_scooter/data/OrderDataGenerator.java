@@ -1,7 +1,6 @@
 package ru.praktikum_services.qa_scooter.data;
 
 import ru.praktikum_services.qa_scooter.models.request.OrderCreateRequest;
-
 import java.time.LocalDate;
 import java.util.List;
 

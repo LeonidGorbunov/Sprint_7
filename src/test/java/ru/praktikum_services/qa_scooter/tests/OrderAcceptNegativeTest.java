@@ -7,6 +7,7 @@ import org.junit.*;
 import ru.praktikum_services.qa_scooter.data.CourierDataGenerator;
 import ru.praktikum_services.qa_scooter.data.OrderDataGenerator;
 import ru.praktikum_services.qa_scooter.models.request.CourierCreateRequest;
+import ru.praktikum_services.qa_scooter.models.request.CourierLoginRequest;
 import ru.praktikum_services.qa_scooter.models.request.OrderCreateRequest;
 import java.util.List;
 import static org.junit.Assert.assertEquals;
@@ -16,25 +17,24 @@ import static org.junit.Assert.assertEquals;
 @Story("2. Негативные сценарии")
 public class OrderAcceptNegativeTest extends BaseTest {
 
-    private static Integer orderId;
-    private static Integer orderTrack;
+    private Integer orderId;
+    private Integer orderTrack;
     private CourierCreateRequest courierRequest;
     private Integer courierId;
 
-    @BeforeClass
-    public static void setUpOrder() {
+    @Before
+    public void setUp() {
         OrderCreateRequest orderRequest = OrderDataGenerator.getDefaultOrder(List.of("BLACK"));
         Response orderResponse = orderClient.actionOrderCreate(orderRequest);
         orderTrack = orderResponse.path("track");
         Response getOrderResponse = orderClient.actionOrderGetByTrackNumber(orderTrack);
         orderId = getOrderResponse.path("order.id");
-    }
 
-    @Before
-    public void setUpCourier() {
         courierRequest = CourierDataGenerator.getDefaultCourier();
         courierClient.actionCourierCreate(courierRequest);
-        Response loginResponse = courierClient.actionCourierLogin(courierRequest);
+
+        CourierLoginRequest loginRequest = new CourierLoginRequest(courierRequest.getLogin(), courierRequest.getPassword());
+        Response loginResponse = courierClient.actionCourierLogin(loginRequest);
         courierId = loginResponse.path("id");
     }
 
@@ -103,12 +103,8 @@ public class OrderAcceptNegativeTest extends BaseTest {
     }
 
     @After
-    public void cleanUpCourier() {
+    public void cleanUp() {
         courierClient.actionCourierDeleteIfCreated(courierRequest);
-    }
-
-    @AfterClass
-    public static void cleanUpOrder() {
         orderClient.actionOrderCancelIfCreated(orderTrack);
     }
 }
